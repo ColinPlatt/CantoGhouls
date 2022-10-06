@@ -57,7 +57,8 @@ contract CantoGhouls is ERC721Enumerable, Ownable {
         uint validatorsTip = tx.gasprice - block.basefee;
         require(validatorsTip >= 69, "Tip your validators"); // priority fee must be at least 69
         require(block.number != lastBlockMinted, "Already minted this block"); // we only allow for a single mint per block
-        require(block.number % 100 == ELIGIBLE_MINT_BLOCKS, "Invalid Block"); // can only mint on blocks that end in 69
+        require(block.number % 100 == ELIGIBLE_MINT_BLOCKS, "Invalid block"); // can only mint on blocks that end in 69
+        require(block.number != lastBlockMinted, "One per eligible block");
         require(nextId < MAX_SUPPLY, "Minted out");
         _;
     }
@@ -98,6 +99,7 @@ contract CantoGhouls is ERC721Enumerable, Ownable {
         _wasteGas();
         _mint(msg.sender, nextId);
         nextId++;
+        lastBlockMinted = block.number;
     }
 
     /*//////////////////////////////////////////////////////////////
