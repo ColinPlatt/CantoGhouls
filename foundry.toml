@@ -3,4 +3,10 @@ src = 'src'
 out = 'out'
 libs = ['lib']
 
+# Need to set gas at 25m
+gas_limit = 25000000
+gas_reports = ['*']
+gas_price = 69
+
+
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config
