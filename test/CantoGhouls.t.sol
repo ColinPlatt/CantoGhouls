@@ -55,6 +55,29 @@ contract CantoGhoulsTest is Test {
         assertEq(nft.totalSupply(),2);
     }
 
+    function testBadMintMoreThanMax() public {
+        
+        for(uint256 i = 0; i<420; i++) {
+            vm.roll(i*100+69);
+
+            vm.startPrank(Alice);
+                nft.mint{gas: 25_000_000}();
+            vm.stopPrank();
+        }
+
+        assertEq(nft.balanceOf(Alice),420);
+        assertEq(nft.totalSupply(),420);
+
+        vm.roll(42_069);
+
+        vm.startPrank(Bob);
+            vm.expectRevert("Minted out");
+            nft.mint{gas: 25_000_000}();
+        vm.stopPrank();
+
+        
+    }
+
     function testBadMintNot69Block() public {
         
         vm.roll(70);
