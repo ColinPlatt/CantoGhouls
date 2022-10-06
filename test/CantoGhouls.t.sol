@@ -56,14 +56,13 @@ contract CantoGhoulsTest is Test {
     }
 
     function testBadMintMoreThanMax() public {
-        
-        for(uint256 i = 0; i<420; i++) {
-            vm.roll(i*100+69);
-
-            vm.startPrank(Alice);
+        vm.startPrank(Alice);
+            for(uint256 i = 0; i<420; i++) {
+                vm.roll(i*100+69);
                 nft.mint{gas: 25_000_000}();
-            vm.stopPrank();
-        }
+                
+            }
+        vm.stopPrank();
 
         assertEq(nft.balanceOf(Alice),420);
         assertEq(nft.totalSupply(),420);
@@ -143,5 +142,38 @@ contract CantoGhoulsTest is Test {
         assertEq(nft.balanceOf(Bob),0);
         assertEq(nft.totalSupply(),1);
         
+    }
+
+    function testChangeBaseUri(string memory uri) public {
+        assertEq(nft.baseUri(),"http://api.CantoGhouls.com/");
+        vm.startPrank(Admin);
+            nft.setBaseURI(uri);
+        vm.stopPrank();
+        assertEq(nft.baseUri(),uri);
+    }
+
+    function testBadUserChangeBaseUri(address user, string memory uri) public {
+        assertEq(nft.baseUri(),"http://api.CantoGhouls.com/");
+        vm.startPrank(user);
+            if(user != Admin) vm.expectRevert("Ownable: caller is not the owner");
+            nft.setBaseURI(uri);
+        vm.stopPrank();
+        if(user != Admin) {
+            assertEq(nft.baseUri(),"http://api.CantoGhouls.com/");
+        } else {
+            assertEq(nft.baseUri(),uri);
+        }
+    }
+
+    function testTokenUri() public {
+        vm.startPrank(Alice);
+            for(uint256 i = 0; i<420; i++) {
+                vm.roll(i*100+69);
+                nft.mint{gas: 25_000_000}();
+                assertEq(nft.tokenURI(i), string.concat("http://api.CantoGhouls.com/", vm.toString(i)));
+            }
+        vm.stopPrank();
+        
+  
     }
 }
