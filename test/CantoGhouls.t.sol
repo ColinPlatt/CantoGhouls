@@ -43,17 +43,82 @@ contract CantoGhoulsTest is Test {
         assertEq(nft.balanceOf(Alice),1);
         assertEq(nft.ownerOf(0),Alice);
         assertEq(nft.totalSupply(),1);
+
+        vm.roll(269);
+
+        vm.startPrank(Bob);
+            nft.mint{gas: 25_000_000}();
+        vm.stopPrank();
+
+        assertEq(nft.balanceOf(Bob),1);
+        assertEq(nft.ownerOf(1), Bob);
+        assertEq(nft.totalSupply(),2);
     }
 
-    function testFailMintNot69() public {
+    function testBadMintNot69Block() public {
         
         vm.roll(70);
 
         vm.startPrank(Alice);
-            nft.mint();
+            vm.expectRevert("Invalid block");
+            nft.mint{gas: 25_000_000}();
         vm.stopPrank();
 
         assertEq(nft.balanceOf(Alice),0);
         assertEq(nft.totalSupply(),0);
+    }
+
+    function testBadMintInsufficientGas() public {
+        
+        vm.roll(69);
+
+        vm.startPrank(Alice);
+            vm.expectRevert("You must supply at least 25m gas");
+            nft.mint{gas: 24_000_000}();
+        vm.stopPrank();
+
+        assertEq(nft.balanceOf(Alice),0);
+        assertEq(nft.totalSupply(),0);
+    }
+
+    function testBadMintGasPriceLow() public {
+        
+        vm.roll(69);
+
+        // we send transactions at 169 gwei, so we bump the base fee
+        vm.fee(101*1e9);
+
+        vm.startPrank(Alice);
+            vm.expectRevert("Tip your validators");
+            nft.mint{gas: 25_000_000}();
+        vm.stopPrank();
+
+        assertEq(nft.balanceOf(Alice),0);
+        assertEq(nft.totalSupply(),0);
+    }
+
+    // shouldn't really be an issue due to gas limits, but let's be sure
+    function testBadMultipleMintInBlock() public {
+        
+        vm.roll(169);
+
+        vm.startPrank(Alice);
+            nft.mint{gas: 25_000_000}();
+        vm.stopPrank();
+
+
+        // this should fail
+        vm.startPrank(Bob);
+            vm.expectRevert("Already minted this block");
+            nft.mint{gas: 25_000_000}();
+        vm.stopPrank();
+
+        assertEq(block.number, 169);
+
+        assertEq(nft.balanceOf(Alice),1);
+        assertEq(nft.ownerOf(0),Alice);
+        assertEq(nft.balanceOf(Bob),0);
+        assertEq(nft.totalSupply(),1);
+        
     }
 }
