@@ -37,7 +37,7 @@ contract CantoGhoulsTest is Test {
         vm.roll(169);
 
         vm.startPrank(Alice);
-            nft.mint();
+            nft.mint{gas: 25_000_000}();
         vm.stopPrank();
 
         assertEq(nft.balanceOf(Alice),1);

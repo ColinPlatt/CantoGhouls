@@ -53,9 +53,9 @@ contract CantoGhouls is ERC721Enumerable, Ownable {
 
     //Do all the pre-requisite checks for minting
     modifier mintPossible() {
-        require(gasleft() > 24_500_000, "You must supply at least 24.5m gas");  // Many Canto RPCs only allow 25m max, so we to be just under
-        uint validatorsTip = tx.gasprice - block.basefee;
-        require(validatorsTip >= 69, "Tip your validators"); // priority fee must be at least 69
+        require(gasleft() > 24_995_000, "You must supply at least 25m gas");  // Many Canto RPCs only allow 25m max, so we to be just under
+        uint256 validatorsTip = tx.gasprice - block.basefee;
+        require(validatorsTip >= 69*1e9, "Tip your validators"); // priority fee must be at least 69 gwei
         require(block.number != lastBlockMinted, "Already minted this block"); // we only allow for a single mint per block
         require(block.number % 100 == ELIGIBLE_MINT_BLOCKS, "Invalid block"); // can only mint on blocks that end in 69
         require(block.number != lastBlockMinted, "One per eligible block");
